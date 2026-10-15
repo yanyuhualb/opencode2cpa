@@ -1,0 +1,125 @@
+# CLIProxyAPI 配置片段：把 OpenCode Zen 的模型接入 cpa。
+#
+# 用法：把下面的 openai-compatibility 段落合并进你的 cpa config.yaml。
+# 字段名以你所用的 CLIProxyAPI 版本为准（对照该版本的 config.example.yaml）；
+# 本文件保证的是 base-url / api-keys / 模型清单这三项内容是正确的。
+#
+# 说明：
+#   * OpenCode Zen 是 OpenAI 兼容端点，免费模型用 api key "public" 即可访问
+#     （opencode CLI 未登录时就是这么做的）。
+#   * alias 是客户端看到的模型名，name 是上游真实模型名。
+#   * 想用自己的 OpenCode Go 订阅（含付费模型）时，把 api-keys 换成 auth.json
+#     里 opencode-go 的 key，并使用下面的 opencode-go 段落。
+
+openai-compatibility:
+  # OpenCode Zen 免费模型（25 个，无需登录，key 用 "public"）
+  - name: opencode-zen
+    base-url: https://opencode.ai/zen/v1
+    api-keys:
+      - "public"
+    models:
+      - name: "trinity-large-preview-free"
+        alias: "zen/trinity-large-preview-free"   # Trinity Large Preview
+      - name: "hy3-preview-free"
+        alias: "zen/hy3-preview-free"   # Hy3 preview Free
+      - name: "minimax-m3-free"
+        alias: "zen/minimax-m3-free"   # MiniMax-M3 Free
+      - name: "glm-4.7-free"
+        alias: "zen/glm-4.7-free"   # GLM-4.7 Free
+      - name: "north-mini-code-free"
+        alias: "zen/north-mini-code-free"   # North Mini Code Free
+      - name: "longcat-2.0-free"
+        alias: "zen/longcat-2.0-free"   # LongCat-2.0 Free
+      - name: "qwen3.6-plus-free"
+        alias: "zen/qwen3.6-plus-free"   # Qwen3.6 Plus Free
+      - name: "ling-3.0-flash-free"
+        alias: "zen/ling-3.0-flash-free"   # Ling-3.0-flash Free
+      - name: "laguna-s-2.1-free"
+        alias: "zen/laguna-s-2.1-free"   # Laguna S 2.1 Free
+      - name: "deepseek-v4-flash-free"
+        alias: "zen/deepseek-v4-flash-free"   # DeepSeek V4 Flash Free (New)
+      - name: "glm-5-free"
+        alias: "zen/glm-5-free"   # GLM-5 Free
+      - name: "mimo-v2-omni-free"
+        alias: "zen/mimo-v2-omni-free"   # MiMo V2 Omni Free
+      - name: "minimax-m2.5-free"
+        alias: "zen/minimax-m2.5-free"   # MiniMax-M2.5 Free
+      - name: "minimax-m2.1-free"
+        alias: "zen/minimax-m2.1-free"   # MiniMax-M2.1 Free
+      - name: "mimo-v2-flash-free"
+        alias: "zen/mimo-v2-flash-free"   # MiMo V2 Flash Free
+      - name: "grok-code"
+        alias: "zen/grok-code"   # Grok Code Fast 1
+      - name: "hy3-free"
+        alias: "zen/hy3-free"   # Hy3 Free
+      - name: "kimi-k2.5-free"
+        alias: "zen/kimi-k2.5-free"   # Kimi K2.5 Free
+      - name: "mimo-v2.5-free"
+        alias: "zen/mimo-v2.5-free"   # MiMo V2.5 Free
+      - name: "big-pickle"
+        alias: "zen/big-pickle"   # Big Pickle
+      - name: "nemotron-3-super-free"
+        alias: "zen/nemotron-3-super-free"   # Nemotron 3 Super Free
+      - name: "nemotron-3-ultra-free"
+        alias: "zen/nemotron-3-ultra-free"   # Nemotron 3 Ultra Free
+      - name: "ring-2.6-1t-free"
+        alias: "zen/ring-2.6-1t-free"   # Ring 2.6 1T Free
+      - name: "mimo-v2-pro-free"
+        alias: "zen/mimo-v2-pro-free"   # MiMo V2 Pro Free
+      - name: "ling-2.6-flash-free"
+        alias: "zen/ling-2.6-flash-free"   # Ling 2.6 Flash Free
+
+  # OpenCode Go 订阅（24 个模型，需要订阅 key）
+  - name: opencode-go
+    base-url: https://opencode.ai/zen/go/v1
+    api-keys:
+      - "<你的 OpenCode Go API key>"
+    models:
+      - name: "qwen3.7-plus"
+        alias: "go/qwen3.7-plus"   # Qwen3.7 Plus
+      - name: "glm-5"
+        alias: "go/glm-5"   # GLM-5
+      - name: "qwen3.5-plus"
+        alias: "go/qwen3.5-plus"   # Qwen3.5 Plus
+      - name: "glm-5.1"
+        alias: "go/glm-5.1"   # GLM-5.1
+      - name: "mimo-v2-omni"
+        alias: "go/mimo-v2-omni"   # MiMo V2 Omni
+      - name: "deepseek-v4-flash"
+        alias: "go/deepseek-v4-flash"   # DeepSeek V4 Flash (New)
+      - name: "kimi-k2.5"
+        alias: "go/kimi-k2.5"   # Kimi K2.5
+      - name: "minimax-m2.7"
+        alias: "go/minimax-m2.7"   # MiniMax-M2.7
+      - name: "glm-5.2"
+        alias: "go/glm-5.2"   # GLM-5.2
+      - name: "qwen3.7-max"
+        alias: "go/qwen3.7-max"   # Qwen3.7 Max
+      - name: "kimi-k2.6"
+        alias: "go/kimi-k2.6"   # Kimi K2.6
+      - name: "mimo-v2-pro"
+        alias: "go/mimo-v2-pro"   # MiMo V2 Pro
+      - name: "minimax-m3"
+        alias: "go/minimax-m3"   # MiniMax-M3
+      - name: "hy3"
+        alias: "go/hy3"   # Hy3
+      - name: "deepseek-v4-pro"
+        alias: "go/deepseek-v4-pro"   # DeepSeek V4 Pro
+      - name: "qwen3.8-max"
+        alias: "go/qwen3.8-max"   # Qwen3.8 Max
+      - name: "mimo-v2.5"
+        alias: "go/mimo-v2.5"   # MiMo V2.5
+      - name: "minimax-m2.5"
+        alias: "go/minimax-m2.5"   # MiniMax-M2.5
+      - name: "gpt-5.6-luna"
+        alias: "go/gpt-5.6-luna"   # GPT-5.6 Luna (2x usage)
+      - name: "grok-4.5"
+        alias: "go/grok-4.5"   # Grok 4.5
+      - name: "kimi-k2.7-code"
+        alias: "go/kimi-k2.7-code"   # Kimi K2.7 Code
+      - name: "kimi-k3"
+        alias: "go/kimi-k3"   # Kimi K3
+      - name: "mimo-v2.5-pro"
+        alias: "go/mimo-v2.5-pro"   # MiMo V2.5 Pro
+      - name: "qwen3.6-plus"
+        alias: "go/qwen3.6-plus"   # Qwen3.6 Plus
