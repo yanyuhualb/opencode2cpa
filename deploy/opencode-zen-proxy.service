@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenCode Zen free models -> OpenAI compatible proxy
+After=network-online.target
+
+[Service]
+Type=simple
+# 改成你的路径
+WorkingDirectory=%h/projects/opencode2cpa
+ExecStart=%h/projects/opencode2cpa/bin/opencode-zen-proxy --addr 127.0.0.1:8320
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

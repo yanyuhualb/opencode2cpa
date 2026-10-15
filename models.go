@@ -25,6 +25,13 @@ const (
 )
 
 const (
+	// OpenCodeVersion is the CLI version this proxy mimics. The zen free tier is
+	// gated on the headers the CLI sends (see DefaultUserAgent), so keep it in
+	// sync with the installed opencode when you upgrade.
+	OpenCodeVersion = "1.18.15"
+	// DefaultUserAgent is the User-Agent the opencode CLI sends upstream.
+	DefaultUserAgent = "opencode/" + OpenCodeVersion
+
 	ZenBaseURL = "https://opencode.ai/zen/v1"
 	GoBaseURL  = "https://opencode.ai/zen/go/v1"
 	// PublicKey is what the CLI sends when the user is not logged in.

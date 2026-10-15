@@ -309,3 +309,61 @@ func TestHealthz(t *testing.T) {
 		t.Errorf("unexpected health payload: %s", recorder.Body)
 	}
 }
+
+func TestOpenCodeHeadersAreSentUpstream(t *testing.T) {
+	var got http.Header
+	server := stubServer(ModeZen, PublicKey, true, nil, func(r *http.Request) (*http.Response, error) {
+		got = r.Header.Clone()
+		return stubResponse(http.StatusOK, "application/json", `{"ok":true}`), nil
+	})
+	server.ExtraHeaders = map[string]string{"x-custom": "1"}
+
+	// The client's own User-Agent must not leak through: the zen free tier gate
+	// looks at the opencode one.
+	recorder := postChat(server, `{"model":"grok-code","messages":[]}`, map[string]string{"User-Agent": "curl/8.5.0"})
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	if ua := got.Get("User-Agent"); ua != DefaultUserAgent {
+		t.Errorf("User-Agent = %q, want %q", ua, DefaultUserAgent)
+	}
+	if client := got.Get("x-opencode-client"); client != "cli" {
+		t.Errorf("x-opencode-client = %q, want cli", client)
+	}
+	if got.Get("x-opencode-session") == "" || got.Get("x-opencode-request") == "" {
+		t.Errorf("missing session/request headers: %v", got)
+	}
+	if got.Get("x-custom") != "1" {
+		t.Errorf("extra header not applied: %v", got)
+	}
+}
+
+func TestPerRequestHeaderIDs(t *testing.T) {
+	ids := make([]string, 0, 2)
+	server := stubServer(ModeZen, PublicKey, true, nil, func(r *http.Request) (*http.Response, error) {
+		ids = append(ids, r.Header.Get("x-opencode-session"))
+		return stubResponse(http.StatusOK, "application/json", `{"ok":true}`), nil
+	})
+	for range 2 {
+		postChat(server, `{"model":"grok-code","messages":[]}`, nil)
+	}
+	if len(ids) != 2 || ids[0] == "" || ids[0] == ids[1] {
+		t.Errorf("session ids should be non-empty and unique, got %v", ids)
+	}
+}
+
+func TestParseHeaders(t *testing.T) {
+	headers, err := parseHeaders([]string{"X-A=1", " x-b = 2 "})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if headers["X-A"] != "1" || headers["x-b"] != "2" {
+		t.Errorf("unexpected headers: %v", headers)
+	}
+	if _, err := parseHeaders([]string{"oops"}); err == nil {
+		t.Error("expected an error for a header without =")
+	}
+	if headers, err := parseHeaders(nil); err != nil || headers != nil {
+		t.Errorf("nil input should stay nil: %v %v", headers, err)
+	}
+}

@@ -1,2 +1,3 @@
 bin/
 opencode2cpa
+__pycache__/

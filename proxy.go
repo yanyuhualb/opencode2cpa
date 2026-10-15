@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,6 +22,12 @@ type Server struct {
 	FreeOnly   bool
 	ClientKeys []string
 	HTTP       *http.Client
+
+	// UserAgent is sent upstream. The zen free tier is gated on the headers the
+	// opencode CLI sends, so this must stay `opencode/<version>`.
+	UserAgent string
+	// ExtraHeaders are added to every upstream request (flag `--header k=v`).
+	ExtraHeaders map[string]string
 }
 
 // NewServer builds a Server. upstream may be empty, in which case the default
@@ -35,6 +43,7 @@ func NewServer(mode Mode, upstream, apiKey, keySource string, freeOnly bool, cli
 		KeySource:  keySource,
 		FreeOnly:   freeOnly,
 		ClientKeys: clientKeys,
+		UserAgent:  DefaultUserAgent,
 		HTTP: &http.Client{
 			Transport: &http.Transport{
 				Proxy:                 http.ProxyFromEnvironment,
@@ -159,6 +168,7 @@ func (s *Server) forward(w http.ResponseWriter, r *http.Request, path string, bo
 		key = override
 	}
 	req.Header.Set("Authorization", "Bearer "+key)
+	s.applyOpenCodeHeaders(req)
 
 	resp, err := s.HTTP.Do(req)
 	if err != nil {
@@ -187,6 +197,33 @@ func (s *Server) forward(w http.ResponseWriter, r *http.Request, path string, bo
 			return
 		}
 	}
+}
+
+// applyOpenCodeHeaders reproduces the headers the opencode CLI attaches to every
+// request for its own providers. Without them the zen endpoint answers
+// 403 "OpenCode's free tier can only be used from within OpenCode".
+func (s *Server) applyOpenCodeHeaders(req *http.Request) {
+	userAgent := s.UserAgent
+	if userAgent == "" {
+		userAgent = DefaultUserAgent
+	}
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("x-opencode-client", "cli")
+	req.Header.Set("x-opencode-session", randomID())
+	req.Header.Set("x-opencode-request", randomID())
+	for name, value := range s.ExtraHeaders {
+		req.Header.Set(name, value)
+	}
+}
+
+// randomID returns a short random hex string, used for the per request
+// x-opencode-session / x-opencode-request headers.
+func randomID() string {
+	var buf [16]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return "0000000000000000"
+	}
+	return hex.EncodeToString(buf[:])
 }
 
 // NormalizeModel strips the provider prefixes used by opencode ("opencode/grok-code")

@@ -2,11 +2,18 @@
 #
 # 用法：把下面的 openai-compatibility 段落合并进你的 cpa config.yaml。
 # 字段名以你所用的 CLIProxyAPI 版本为准（对照该版本的 config.example.yaml）；
-# 本文件保证的是 base-url / api-keys / 模型清单这三项内容是正确的。
+# 本文件保证的是 base-url / api-keys / headers / 模型清单这些内容是正确的。
 #
 # 说明：
 #   * OpenCode Zen 是 OpenAI 兼容端点，免费模型用 api key "public" 即可访问
 #     （opencode CLI 未登录时就是这么做的）。
+#   * 但 zen 会校验请求来自 opencode CLI：必须带上
+#       User-Agent: opencode/1.18.15
+#       x-opencode-client: cli
+#       x-opencode-session / x-opencode-request: 随机串
+#     否则返回 403 "OpenCode's free tier can only be used from within OpenCode"。
+#     如果你的 cpa 版本不支持自定义 header，就改用本仓库的 sidecar
+#     （base-url 指向 http://127.0.0.1:8320/v1，header 由 sidecar 自动补）。
 #   * alias 是客户端看到的模型名，name 是上游真实模型名。
 #   * 想用自己的 OpenCode Go 订阅（含付费模型）时，把 api-keys 换成 auth.json
 #     里 opencode-go 的 key，并使用下面的 opencode-go 段落。
@@ -17,6 +24,10 @@ openai-compatibility:
     base-url: https://opencode.ai/zen/v1
     api-keys:
       - "public"
+    # 字段名以你的 cpa 版本为准（部分版本是 headers，部分版本不支持自定义 header）
+    headers:
+      User-Agent: "opencode/1.18.15"
+      x-opencode-client: "cli"
     models:
       - name: "trinity-large-preview-free"
         alias: "zen/trinity-large-preview-free"   # Trinity Large Preview
@@ -74,6 +85,9 @@ openai-compatibility:
     base-url: https://opencode.ai/zen/go/v1
     api-keys:
       - "<你的 OpenCode Go API key>"
+    headers:
+      User-Agent: "opencode/1.18.15"
+      x-opencode-client: "cli"
     models:
       - name: "qwen3.7-plus"
         alias: "go/qwen3.7-plus"   # Qwen3.7 Plus
